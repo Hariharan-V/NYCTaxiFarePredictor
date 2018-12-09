@@ -51,7 +51,8 @@ for j in range(df_test.shape[0]):
 	df_train = df_train.sort_values(["distance"], ascending = True).reset_index(drop=True)
 	# print(df_train)
 
-	prediction = df_train['fare_amount'].head(n=1).mean()
+	prediction = df_train['fare_amount'].head(n=5).mean()
+
 	# print(str(prediction)+ " blah "+str(df_test['fare_amount'].iloc[j]))
 	
 	a= a+accuracy(prediction,df_test['fare_amount'].iloc[j])
