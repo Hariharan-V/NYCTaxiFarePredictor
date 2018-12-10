@@ -41,8 +41,10 @@ a = 0.0
 for j in range(df_test.shape[0]):
 	# print df_test.head(n=2)
 	distance = pd.DataFrame(columns=["distance"])
+	print("."),
 	for i in range (df_train.shape[0]):
-		
+		if(i%100==0):
+			print("."),
 		distance = distance.append(pd.DataFrame([[math.pow(df_train['pickup_datetime'].iloc[i]-df_test['pickup_datetime'].iloc[j],2.0)+math.pow(df_train['pickup_longitude'].iloc[i]-df_test['pickup_longitude'].iloc[j],2.0)+math.pow(df_train['pickup_latitude'].iloc[i]-df_test['pickup_latitude'].iloc[j],2.0)+math.pow(df_train['dropoff_longitude'].iloc[i]-df_test['dropoff_longitude'].iloc[j],2.0)+math.pow(df_train['dropoff_latitude'].iloc[i]-df_test['dropoff_latitude'].iloc[j],2.0)+math.pow(df_train['passenger_count'].iloc[i]-df_test['passenger_count'].iloc[j],2.0)]],columns= ["distance"],index = [i]))
 	
 	
@@ -57,7 +59,7 @@ for j in range(df_test.shape[0]):
 	
 	a= a+accuracy(prediction,df_test['fare_amount'].iloc[j])
 
-print("The predictions are accurate within "+str(math.sqrt(a/float(df_test.shape[0])))+" dollars ")
+print("The predictions have a root mean square of  "+str(math.sqrt(a/float(df_test.shape[0])))+" dollars ")
 
 
 

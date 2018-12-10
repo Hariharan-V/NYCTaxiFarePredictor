@@ -58,15 +58,19 @@ model = build_model()
 class PrintDot(keras.callbacks.Callback):
   def on_epoch_end(self, epoch, logs):
     if epoch % 100 == 0: print('')
-    print('.')
+    print("."),
+    
+
 
 EPOCHS = 500
 history = model.fit(df_train, df_train_output, epochs=EPOCHS,
                     validation_split=0.2, verbose=0,
                     callbacks=[PrintDot()])
 [loss, mae] = model.evaluate(df_train, df_train_output, verbose=0)
+print("")
 print("Training set Mean Abs Error:" + str(mae))
 
 test_predictions = model.predict(df_test).flatten()
 error = test_predictions - df_test_output
-print(np.absolute(error).mean(0))
+
+print("The neural network has a absolute mean error of "+str(np.absolute(error).mean(0)))

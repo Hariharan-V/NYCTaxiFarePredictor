@@ -38,35 +38,47 @@ df_test = (df_test - mean) / std
 
 
 
-def build_model():
-  model = keras.Sequential([
-    keras.layers.Dense(64, activation=tf.nn.relu,
-                       input_shape=(df_train.shape[1],)),
-     keras.layers.Dense(32, activation=tf.nn.relu),
-    keras.layers.Dense(4, activation=tf.nn.relu),
-    keras.layers.Dense(2, activation=tf.nn.relu),
-    keras.layers.Dense(1)
-  ])
-  optimizer = tf.train.RMSPropOptimizer(0.001)
+def neural_net_model(X_data,input_dim):
+    W_1 = tf.Variable(tf.random_uniform([input_dim,10]))
+    b_1 = tf.Variable(tf.zeros([10]))
+    layer_1 = tf.add(tf.matmul(X_data,W_1), b_1)
+    layer_1 = tf.nn.relu(layer_1)
 
-  model.compile(loss='mse',
-                optimizer=optimizer,
-                metrics=['mae'])
-  return model
+    W_2 = tf.Variable(tf.random_uniform([10,10]))
+    b_2 = tf.Variable(tf.zeros([10]))
+    layer_2 = tf.add(tf.matmul(layer_1,W_2), b_2)
+    layer_2 = tf.nn.relu(layer_2)
+ 
+    W_O = tf.Variable(tf.random_uniform([10,1]))
+    b_O = tf.Variable(tf.zeros([1]))
+    output = tf.add(tf.matmul(layer_2,W_O), b_O)
+  
+    return output
 
-model = build_model()
-class PrintDot(keras.callbacks.Callback):
-  def on_epoch_end(self, epoch, logs):
-    if epoch % 100 == 0: print('')
-    print('.')
+c_t = []
+c_test = []
+df_train = df_train.as_matrix()
+df_train_output = df_train_output.as_matrix()
+df_test = df_test.as_matrix()
+df_test_output = df_test_output.as_matrix()
+xs = tf.placeholder("float")
+ys = tf.placeholder("float")
+output = neural_net_model(xs,df_train.shape[1])
+cost = tf.reduce_mean(tf.square(output-ys))
+# mean squared error cost function
+train = tf.train.GradientDescentOptimizer(0.001).minimize(cost)
+with tf.Session() as sess:
+  
+    sess.run(tf.global_variables_initializer())
+    saver = tf.train.Saver()
+    
+    for i in range(100):
+        for j in range(df_train.shape[0]):
+            sess.run([cost,train],feed_dict=    {xs:df_train[j,:].reshape(1,df_train.shape[1]), ys:df_train[j]})
+            # Run cost and train with each sample
+        c_t.append(sess.run(cost, feed_dict={xs:df_train,ys:df_train_output}))
+        c_test.append(sess.run(cost, feed_dict={xs:df_test,ys:df_test_output}))
+        print('Epoch :',i,'Cost :',c_t[i])
+    pred = sess.run(output, feed_dict={xs:df_test})
 
-EPOCHS = 500
-history = model.fit(df_train, df_train_output, epochs=EPOCHS,
-                    validation_split=0.2, verbose=0,
-                    callbacks=[PrintDot()])
-[loss, mae] = model.evaluate(df_train, df_train_output, verbose=0)
-print("Training set Mean Abs Error:" + str(mae))
-
-test_predictions = model.predict(df_test).flatten()
-error = test_predictions - df_test_output
-print(np.absolute(error).mean(0))
+    print('Cost :',sess.run(cost, feed_dict={xs:df_test,ys:df_test_output}))
